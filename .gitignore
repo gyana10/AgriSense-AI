@@ -1,0 +1,37 @@
+# Python
+backend/agri/
+backend/__pycache__/
+*.py[cod]
+
+# Environment
+.env
+
+# React
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# ML Models
+*.pt
+*.pth
+*.onnx
+*.keras
+*.h5
+*.joblib
+*.pkl
+
+# Logs
+*.log
+
+# MLflow
+mlruns/
+
+# DVC
+.dvc/
+
+# OS
+.DS_Store
+Thumbs.db
