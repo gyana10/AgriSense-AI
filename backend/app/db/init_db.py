@@ -1,5 +1,5 @@
 from app.db.database import Base, engine
-
+from app.models.crop_prediction import CropPrediction
 from app.models.user import User
 
 

@@ -1,0 +1,1 @@
+from app.models.crop_prediction import CropPrediction
