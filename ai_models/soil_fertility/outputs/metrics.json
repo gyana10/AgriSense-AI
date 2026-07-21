@@ -1,0 +1,9 @@
+{
+    "model": "RandomForestClassifier",
+    "training_samples": 500,
+    "classes": [
+        "Low",
+        "Medium",
+        "High"
+    ]
+}

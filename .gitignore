@@ -35,3 +35,9 @@ mlruns/
 # OS
 .DS_Store
 Thumbs.db
+venv/
+__pycache__/
+*.pyc
+*.joblib
+*.pkl
+.ipynb_checkpoints/

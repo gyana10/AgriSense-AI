@@ -1,0 +1,31 @@
+{
+    "best_model": "CatBoost",
+    "best_accuracy": 0.9977,
+    "model_comparison": {
+        "RandomForest": {
+            "mean_cv_accuracy": 0.9932,
+            "test_accuracy": 0.9955
+        },
+        "XGBoost": {
+            "mean_cv_accuracy": 0.9886,
+            "test_accuracy": 0.9932
+        },
+        "LightGBM": {
+            "mean_cv_accuracy": 0.992,
+            "test_accuracy": 0.9886
+        },
+        "CatBoost": {
+            "mean_cv_accuracy": 0.9932,
+            "test_accuracy": 0.9977
+        }
+    },
+    "feature_importance": {
+        "humidity": 0.2248,
+        "K": 0.181,
+        "rainfall": 0.1803,
+        "N": 0.1761,
+        "P": 0.1491,
+        "temperature": 0.0644,
+        "ph": 0.0244
+    }
+}

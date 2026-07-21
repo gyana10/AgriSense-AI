@@ -1,12 +1,16 @@
 from pathlib import Path
+from ai_models.common.config import AI_MODELS_DIR, DATASETS_DIR, RANDOM_STATE, TEST_SIZE
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+MODULE_DIR = AI_MODELS_DIR / "crop_recommendation"
+DATASET_PATH = DATASETS_DIR / "Crop_recommendation.csv"
 
-DATASET_PATH = PROJECT_ROOT / "datasets" / "Crop_recommendation.csv"
+TRAINED_MODELS_DIR = MODULE_DIR / "trained_models"
+OUTPUTS_DIR = MODULE_DIR / "outputs"
 
-MODEL_DIR = PROJECT_ROOT / "ai_models" / "crop_recommendation" / "trained_models"
+MODEL_PATH = TRAINED_MODELS_DIR / "best_crop_model.joblib"
+LABEL_ENCODER_PATH = TRAINED_MODELS_DIR / "label_encoder.joblib"
+SCALER_PATH = TRAINED_MODELS_DIR / "scaler.joblib"
+METRICS_PATH = OUTPUTS_DIR / "metrics.json"
 
-OUTPUT_DIR = PROJECT_ROOT / "ai_models" / "crop_recommendation" / "outputs"
-
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+FEATURE_NAMES = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
+TARGET_NAME = "label"
