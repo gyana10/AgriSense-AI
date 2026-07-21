@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary-dark: #1B5E20;
+    --color-primary: #2E7D32;
+    --color-primary-medium: #43A047;
+    --color-primary-light: #66BB6A;
+    --color-accent: #F9A825;
+    --color-accent-bright: #FFC107;
+    --bg-light: #F8FAF7;
+    --bg-dark-base: #101510;
+    --bg-dark-card: #182018;
+    --bg-dark-border: #263326;
+  }
+
+  body {
+    font-family: 'Inter', 'Manrope', sans-serif;
+    background-color: var(--bg-light);
+    color: #101510;
+    overflow-x: hidden;
+  }
+
+  .dark body {
+    background-color: var(--bg-dark-base);
+    color: #F8FAF7;
+  }
+}
+
+/* Custom Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(46, 125, 50, 0.12);
+}
+
+.dark .glass-panel {
+  background: rgba(24, 32, 24, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(38, 51, 38, 0.8);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .glass-nav {
+  background: rgba(16, 21, 16, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Video Overlay Gradient */
+.hero-gradient-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(16, 21, 16, 0.55) 0%,
+    rgba(27, 94, 32, 0.65) 50%,
+    rgba(16, 21, 16, 0.9) 100%
+  );
+}
+
+/* Animations */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s infinite ease-in-out;
+}
