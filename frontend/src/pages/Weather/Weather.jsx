@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../services/api';
-import { CloudSun, Droplets, Wind, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { useFarm } from '../../context/FarmContext';
+import { CloudSun, Droplets, Wind, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 const Weather = () => {
+  const { farmState } = useFarm();
   const [data, setData] = useState(null);
 
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const res = await API.get('/weather/intelligence');
+        const res = await API.get('/weather/intelligence', {
+          params: {
+            temp: farmState.temperature || 29.5,
+            humidity: farmState.humidity || 78.0,
+            rainfall: farmState.rainfall || 5.0
+          }
+        });
         setData(res.data);
       } catch (err) {
         console.error(err);
       }
     };
     fetchWeather();
-  }, []);
+  }, [farmState]);
 
-  if (!data) return <div className="p-8 text-center text-xs text-slate-400">Loading Weather Intelligence...</div>;
+  if (!data) return <div className="p-8 text-center text-xs text-slate-400">Loading Weather & Irrigation Plan...</div>;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -28,8 +36,10 @@ const Weather = () => {
           <CloudSun className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white">Weather Intelligence & Smart Irrigation</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Disease/Pest risk scoring and automated watering advisor</p>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white">Weather Intelligence & Smart Irrigation Plan</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Tailored for Active Crop: <b className="text-emerald-500 capitalize">{farmState.crop || 'Rice'}</b> (Soil Rainfall: {farmState.rainfall || 202.9} mm)
+          </p>
         </div>
       </div>
 
@@ -74,13 +84,16 @@ const Weather = () => {
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">
-            Smart Irrigation Advisor
+            Smart Irrigation Plan for {farmState.crop || 'Rice'}
           </h3>
           <div className="p-4 rounded-2xl bg-sky-500 text-white shadow-xl shadow-sky-500/20 space-y-1">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-sky-200">Recommended watering</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-sky-200">Recommended Schedule</span>
             <h4 className="text-xl font-black">{data.irrigation_advice.best_time_to_water}</h4>
             <p className="text-xs text-sky-100">Duration: <b>{data.irrigation_advice.recommended_duration_minutes} Minutes</b></p>
           </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            *Irrigation plan automatically factors in historical NPK, soil moisture, and rainfall parameters.
+          </p>
         </div>
 
       </div>

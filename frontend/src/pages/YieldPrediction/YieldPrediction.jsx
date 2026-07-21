@@ -1,19 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../../services/api';
-import { LineChart, DollarSign, Scale, Loader2 } from 'lucide-react';
+import { useFarm } from '../../context/FarmContext';
+import { LineChart, DollarSign, Scale, Loader2, ArrowRight, CloudSun } from 'lucide-react';
 
 const YieldPrediction = () => {
+  const { farmState, updateYieldEstimate } = useFarm();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     state: 'Odisha',
     district: 'Khordha',
-    crop: 'Rice',
+    crop: farmState.crop || 'Rice',
     season: 'Kharif',
     area_hectares: 2.5,
-    rainfall: 1250.0
+    rainfall: farmState.rainfall || 1250.0
   });
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (farmState.crop) {
+      setFormData(prev => ({
+        ...prev,
+        crop: farmState.crop,
+        rainfall: farmState.rainfall || 1250.0
+      }));
+    }
+  }, [farmState]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +43,7 @@ const YieldPrediction = () => {
         rainfall: Number(formData.rainfall)
       });
       setResult(res.data);
+      updateYieldEstimate(res.data.total_production_tons, res.data.estimated_revenue_inr);
     } catch (err) {
       console.error(err);
     } finally {
@@ -43,15 +59,24 @@ const YieldPrediction = () => {
         </div>
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white">Crop Yield & Production Regressor</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Estimates yield (tons/ha), total harvest tonnage, and market revenue in INR</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Connected Pipeline ({farmState.crop ? `Active Crop: ${farmState.crop}` : 'Select Crop'})
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">
-            Farm Location & Crop Metadata
-          </h3>
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              Farm Location & Crop Metadata
+            </h3>
+            {farmState.crop && (
+              <span className="text-[10px] bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold px-2 py-0.5 rounded-full">
+                Auto-Filled from Crop ML
+              </span>
+            )}
+          </div>
           
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -121,7 +146,7 @@ const YieldPrediction = () => {
             className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LineChart className="w-4 h-4" />}
-            Calculate Yield & Harvest Tonnage
+            Calculate Yield & Harvest Tonnage for {formData.crop}
           </button>
         </form>
 
@@ -149,6 +174,18 @@ const YieldPrediction = () => {
                   <DollarSign className="w-8 h-8 text-emerald-600" />
                 </div>
               </div>
+
+              {/* Action Trigger to Weather & Irrigation Plan */}
+              <button
+                onClick={() => navigate('/weather')}
+                className="w-full p-2.5 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 border border-sky-200 dark:border-sky-800 rounded-xl text-xs font-bold text-sky-700 dark:text-sky-300 flex items-center justify-between transition-colors mt-4"
+              >
+                <span className="flex items-center gap-2">
+                  <CloudSun className="w-4 h-4 text-sky-600" />
+                  Proceed to Smart Irrigation Plan for {formData.crop}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           ) : (
             <div className="py-16 text-center text-slate-400 text-xs">

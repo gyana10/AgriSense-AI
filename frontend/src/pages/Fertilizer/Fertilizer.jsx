@@ -1,18 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../../services/api';
-import { TestTube2, CheckCircle2, Leaf, Calendar, Loader2 } from 'lucide-react';
+import { useFarm } from '../../context/FarmContext';
+import { TestTube2, Leaf, Calendar, Loader2, ArrowRight, LineChart, CheckCircle2 } from 'lucide-react';
 
 const Fertilizer = () => {
+  const { farmState, updateFertilizerPlan } = useFarm();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    crop: 'rice',
-    nitrogen: 20,
-    phosphorus: 10,
-    potassium: 10,
+    crop: farmState.crop || 'Rice',
+    nitrogen: farmState.nitrogen || 20,
+    phosphorus: farmState.phosphorus || 10,
+    potassium: farmState.potassium || 10,
     soil_type: 'Loamy'
   });
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (farmState.crop) {
+      setFormData(prev => ({
+        ...prev,
+        crop: farmState.crop,
+        nitrogen: farmState.nitrogen,
+        phosphorus: farmState.phosphorus,
+        potassium: farmState.potassium
+      }));
+    }
+  }, [farmState]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +43,7 @@ const Fertilizer = () => {
         soil_type: formData.soil_type
       });
       setResult(res.data);
+      updateFertilizerPlan(res.data.recommended_fertilizer, res.data.organic_alternative, res.data.application_schedule);
     } catch (err) {
       console.error(err);
     } finally {
@@ -41,15 +59,24 @@ const Fertilizer = () => {
         </div>
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white">Fertilizer & Organic Alternative Recommender</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Nutrient deficit calculator & application schedule</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Connected to Crop Recommendation pipeline ({farmState.crop ? `Active Crop: ${farmState.crop}` : 'Select Crop'})
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">
-            Target Crop & Soil Nutrients
-          </h3>
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              Target Crop & Soil Nutrients
+            </h3>
+            {farmState.crop && (
+              <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold px-2 py-0.5 rounded-full">
+                Auto-Filled from Crop ML
+              </span>
+            )}
+          </div>
           
           <div>
             <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Crop Name</label>
@@ -96,7 +123,7 @@ const Fertilizer = () => {
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <TestTube2 className="w-4 h-4" />}
-            Calculate Fertilizer Plan
+            Calculate Fertilizer Plan for {formData.crop}
           </button>
         </form>
 
@@ -108,7 +135,7 @@ const Fertilizer = () => {
           {result ? (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-emerald-600 text-white shadow-xl shadow-emerald-600/20">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-200">Recommended Chemical Fertilizer</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-200">Chemical Fertilizer</span>
                 <h2 className="text-2xl font-black mt-0.5">{result.recommended_fertilizer}</h2>
               </div>
 
@@ -132,6 +159,18 @@ const Fertilizer = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Action Trigger to Yield Prediction */}
+              <button
+                onClick={() => navigate('/yield-prediction')}
+                className="w-full p-2.5 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center justify-between transition-colors mt-4"
+              >
+                <span className="flex items-center gap-2">
+                  <LineChart className="w-4 h-4 text-indigo-600" />
+                  Proceed to Yield Prediction for {formData.crop}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           ) : (
             <div className="py-16 text-center text-slate-400 text-xs">

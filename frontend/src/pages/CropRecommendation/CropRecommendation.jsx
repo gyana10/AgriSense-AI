@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../../services/api';
-import { Sprout, CheckCircle2, BarChart2, Lightbulb, Loader2 } from 'lucide-react';
+import { useFarm } from '../../context/FarmContext';
+import { Sprout, BarChart2, Lightbulb, Loader2, ArrowRight, TestTube2, LineChart, CloudSun } from 'lucide-react';
 
 const CropRecommendation = () => {
+  const { farmState, updateCropRecommendation } = useFarm();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    nitrogen: 90,
-    phosphorus: 42,
-    potassium: 43,
-    temperature: 20.8,
-    humidity: 82.0,
-    ph: 6.5,
-    rainfall: 202.9
+    nitrogen: farmState.nitrogen || 90,
+    phosphorus: farmState.phosphorus || 42,
+    potassium: farmState.potassium || 43,
+    temperature: farmState.temperature || 20.8,
+    humidity: farmState.humidity || 82.0,
+    ph: farmState.ph || 6.5,
+    rainfall: farmState.rainfall || 202.9
   });
 
   const [loading, setLoading] = useState(false);
@@ -20,7 +25,7 @@ const CropRecommendation = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await API.post('/crop/predict', {
+      const numericData = {
         nitrogen: Number(formData.nitrogen),
         phosphorus: Number(formData.phosphorus),
         potassium: Number(formData.potassium),
@@ -28,8 +33,13 @@ const CropRecommendation = () => {
         humidity: Number(formData.humidity),
         ph: Number(formData.ph),
         rainfall: Number(formData.rainfall)
-      });
+      };
+
+      const res = await API.post('/crop/predict', numericData);
       setResult(res.data);
+      
+      // Update global cross-module pipeline state
+      updateCropRecommendation(res.data.recommended_crop, numericData);
     } catch (err) {
       console.error(err);
     } finally {
@@ -149,7 +159,7 @@ const CropRecommendation = () => {
           </button>
         </form>
 
-        {/* Prediction Results */}
+        {/* Prediction Results & Connected Next Steps */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">
@@ -165,7 +175,7 @@ const CropRecommendation = () => {
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Top 3 Candidates:</h4>
+                  <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Top Candidates:</h4>
                   <div className="space-y-2">
                     {result.top_recommendations.map((rec, idx) => (
                       <div key={idx} className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800">
@@ -174,6 +184,33 @@ const CropRecommendation = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Seamless Pipeline Action Triggers */}
+                <div className="pt-2 space-y-2 border-t border-slate-100 dark:border-slate-800">
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Connected Next Steps:</p>
+                  
+                  <button
+                    onClick={() => navigate('/fertilizer')}
+                    className="w-full p-2.5 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center justify-between transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <TestTube2 className="w-4 h-4 text-emerald-600" />
+                      Get Fertilizer Plan for {result.recommended_crop}
+                    </span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/yield-prediction')}
+                    className="w-full p-2.5 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center justify-between transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <LineChart className="w-4 h-4 text-indigo-600" />
+                      Estimate Yield & Revenue for {result.recommended_crop}
+                    </span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ) : (
@@ -186,7 +223,7 @@ const CropRecommendation = () => {
 
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
-            <span>High rainfall (&gt;200mm) strongly favors rice cultivation.</span>
+            <span>Recommended crop will automatically flow to Fertilizer, Yield & Irrigation plans.</span>
           </div>
         </div>
 
